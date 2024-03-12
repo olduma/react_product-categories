@@ -24,6 +24,8 @@ export const App = () => {
   const [activeUser, setActiveUser] = useState('All');
   const [query, setQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState([]);
+  const [sortField, setSortField] = useState(''); // 'id', 'name', 'category', user
+  const [sortOrder, setSortOrder] = useState('asc'); // 'desc'
 
   let visibleProducts = [...products];
 
@@ -42,6 +44,56 @@ export const App = () => {
   if (selectedCategories.length) {
     visibleProducts = visibleProducts
       .filter(product => selectedCategories.includes(product.category.title));
+  }
+
+  if (sortField) {
+    visibleProducts = [...visibleProducts].sort((a, b) => {
+      const aValue = a[sortField];
+      const bValue = b[sortField];
+
+      if (typeof aValue === 'number') {
+        return sortOrder === 'asc'
+          ? aValue - bValue
+          : bValue - aValue;
+      }
+
+      return sortOrder === 'asc'
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    });
+  }
+
+  function sortByHandle(field) {
+    if (sortField === field) {
+      if (sortOrder === 'asc') {
+        setSortOrder('desc');
+      } else if (sortOrder === 'desc') {
+        setSortOrder('asc');
+        setSortField('');
+      }
+    } else {
+      setSortField(field);
+    }
+  }
+
+  function changeIconHandle(field) {
+    let iconClass;
+
+    if (sortField === field) {
+      if (sortOrder === 'asc') {
+        iconClass = 'fa-sort-down';
+      } else {
+        iconClass = 'fa-sort-up';
+      }
+    } else {
+      iconClass = 'fa-sort';
+    }
+
+    return (
+      <span className="icon">
+        <i data-cy="SortIcon" className={`fas ${iconClass}`} />
+      </span>
+    );
   }
 
   return (
@@ -153,6 +205,8 @@ export const App = () => {
                   setActiveUser('All');
                   setQuery('');
                   setSelectedCategories([]);
+                  setSortField('');
+                  setSortOrder('asc');
                 }}
               >
                 Reset all filters
@@ -179,10 +233,8 @@ export const App = () => {
                   <span className="is-flex is-flex-wrap-nowrap">
                     ID
 
-                    <a href="#/">
-                      <span className="icon">
-                        <i data-cy="SortIcon" className="fas fa-sort" />
-                      </span>
+                    <a href="#/" onClick={() => sortByHandle('id')}>
+                      {changeIconHandle('id')}
                     </a>
                   </span>
                 </th>
@@ -191,10 +243,8 @@ export const App = () => {
                   <span className="is-flex is-flex-wrap-nowrap">
                     Product
 
-                    <a href="#/">
-                      <span className="icon">
-                        <i data-cy="SortIcon" className="fas fa-sort-down" />
-                      </span>
+                    <a href="#/" onClick={() => sortByHandle('name')}>
+                      {changeIconHandle('name')}
                     </a>
                   </span>
                 </th>
