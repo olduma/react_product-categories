@@ -1,5 +1,6 @@
 /* eslint-disable jsx-a11y/accessible-emoji */
 import React, { useState } from 'react';
+import cn from 'classnames';
 import './App.scss';
 
 import usersFromServer from './api/users';
@@ -22,6 +23,7 @@ const products = productsFromServer.map((product) => {
 export const App = () => {
   const [activeUser, setActiveUser] = useState('All');
   const [query, setQuery] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
   let visibleProducts = [...products];
 
@@ -35,6 +37,11 @@ export const App = () => {
       .filter(product => product.name
         .toLocaleLowerCase()
         .includes(query.trim().toLocaleLowerCase()));
+  }
+
+  if (selectedCategories.length) {
+    visibleProducts = visibleProducts
+      .filter(product => selectedCategories.includes(product.category.title));
   }
 
   return (
@@ -102,41 +109,39 @@ export const App = () => {
               <a
                 href="#/"
                 data-cy="AllCategories"
-                className="button is-success mr-6 is-outlined"
+                className={cn('button is-success mr-6',
+                  { 'is-outlined': selectedCategories.length })
+                }
+                onClick={() => setSelectedCategories([])}
               >
                 All
               </a>
 
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Category 1
-              </a>
+              {categoriesFromServer.map(category => (
+                <a
+                  key={category.id}
+                  data-cy="Category"
+                  href="#/"
+                  className={cn('button mr-2 my-1', {
+                    'is-info': selectedCategories.includes(category.title),
+                  })}
+                  onClick={() => {
+                    if (!selectedCategories.includes(category.title)) {
+                      setSelectedCategories(
+                        [...selectedCategories, category.title],
+                      );
+                    } else {
+                      setSelectedCategories(
+                        selectedCategories
+                          .filter(item => item !== category.title),
+                      );
+                    }
+                  }}
 
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Category 2
-              </a>
-
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Category 3
-              </a>
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Category 4
-              </a>
+                >
+                  {category.title}
+                </a>
+              ))}
             </div>
 
             <div className="panel-block">
@@ -147,6 +152,7 @@ export const App = () => {
                 onClick={() => {
                   setActiveUser('All');
                   setQuery('');
+                  setSelectedCategories([]);
                 }}
               >
                 Reset all filters
