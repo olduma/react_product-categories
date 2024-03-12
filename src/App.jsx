@@ -144,6 +144,10 @@ export const App = () => {
                 data-cy="ResetAllButton"
                 href="#/"
                 className="button is-link is-outlined is-fullwidth"
+                onClick={() => {
+                  setActiveUser('All');
+                  setQuery('');
+                }}
               >
                 Reset all filters
               </a>
@@ -152,10 +156,13 @@ export const App = () => {
         </div>
 
         <div className="box table-container">
-          <p data-cy="NoMatchingMessage">
-            No products matching selected criteria
-          </p>
+          {!visibleProducts.length && (
+            <p data-cy="NoMatchingMessage">
+              No products matching selected criteria
+            </p>
+          )}
 
+          {visibleProducts.length > 0 && (
           <table
             data-cy="ProductTable"
             className="table is-striped is-narrow is-fullwidth"
@@ -229,7 +236,7 @@ export const App = () => {
                     className={product.user.sex === 'm'
                       ? 'has-text-link'
                       : 'has-text-danger'
-                  }
+                            }
                   >
                     {product.user.name}
                   </td>
@@ -237,6 +244,7 @@ export const App = () => {
               ))}
             </tbody>
           </table>
+          )}
         </div>
       </div>
     </div>
